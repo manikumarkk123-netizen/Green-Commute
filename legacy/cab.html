@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Book a Cab — Green Commute</title>
+    <meta name="description" content="Book eco-friendly cab rides with Green Commute. Affordable, comfortable, and sustainable.">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="global.css">
+</head>
+
+<body>
+
+<!-- ============ NAVBAR ============ -->
+<nav class="gc-navbar">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <img src="images/logo.png" alt="Green Commute Logo">
+                <span class="brand-text">GreenCommute</span>
+            </a>
+            <button class="navbar-toggler d-lg-none" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-lg-center gap-1">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="cab.html">Cab</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rentals.html">Rentals</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-btn nav-btn-outline" href="login.html">
+                            <i class="fa-solid fa-right-to-bracket"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-btn nav-btn-primary" href="register.html">
+                            <i class="fa-solid fa-user-plus"></i> Register
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero-mini">
+    <div class="container">
+        <div class="hero-badge animate-fade-up" style="margin: 0 auto 16px;">
+            <i class="fa-solid fa-taxi"></i> Cab Booking
+        </div>
+        <h1 class="animate-fade-up animate-fade-up-d1">Book an Eco-Friendly Cab 🚕</h1>
+        <p class="animate-fade-up animate-fade-up-d2">Comfortable, affordable & sustainable rides across the city</p>
+    </div>
+</section>
+
+<!-- ============ BOOKING SECTION ============ -->
+<section class="section">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- Booking Form -->
+            <div class="col-lg-7">
+                <div class="booking-card animate-fade-up animate-fade-up-d1">
+                    <h3><i class="fa-solid fa-map-location-dot" style="color: var(--primary); margin-right: 8px;"></i> Enter Ride Details</h3>
+
+                    <form>
+                        <div class="gc-input-group">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <input type="text" class="gc-input" placeholder="Pickup Location" required>
+                        </div>
+
+                        <div class="gc-input-group">
+                            <i class="fa-solid fa-flag-checkered"></i>
+                            <input type="text" class="gc-input" placeholder="Drop Location" required>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="gc-input-group">
+                                    <i class="fa-solid fa-calendar"></i>
+                                    <input type="date" class="gc-input" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="gc-input-group">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <input type="time" class="gc-input" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gc-input-group">
+                            <i class="fa-solid fa-car"></i>
+                            <select class="gc-select">
+                                <option>Select Cab Type</option>
+                                <option>🚗 Eco Mini — ₹8/km</option>
+                                <option>🚙 Eco Sedan — ₹12/km</option>
+                                <option>🚐 Electric SUV — ₹18/km</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-gc btn-primary btn-block btn-lg" style="margin-top: 8px;">
+                            <i class="fa-solid fa-bolt"></i> Book Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Fare Estimate -->
+            <div class="col-lg-5">
+                <div class="fare-card animate-fade-up animate-fade-up-d2">
+                    <h3>Estimated Fare</h3>
+                    <div class="fare-amount">₹250</div>
+                    <p class="fare-note">Base fare calculated for 10 km</p>
+                    <div class="eco-badge">
+                        <i class="fa-solid fa-leaf"></i>
+                        This ride saves 2kg CO₂ emissions
+                    </div>
+                </div>
+
+                <!-- Quick Info Cards -->
+                <div class="row g-3 mt-3">
+                    <div class="col-6">
+                        <div class="gc-card text-center" style="padding: 20px;">
+                            <i class="fa-solid fa-shield-halved" style="font-size:24px; color: var(--primary); margin-bottom:8px;"></i>
+                            <p style="font-size: 13px; margin: 0; font-weight: 600;">Safe Rides</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="gc-card text-center" style="padding: 20px;">
+                            <i class="fa-solid fa-headset" style="font-size:24px; color: var(--primary); margin-bottom:8px;"></i>
+                            <p style="font-size: 13px; margin: 0; font-weight: 600;">24/7 Support</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="gc-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="footer-brand">
+                    <img src="images/logo.png" alt="Logo">
+                    <span>GreenCommute</span>
+                </div>
+                <p class="footer-desc">Making every commute greener, one ride at a time.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h5>Services</h5>
+                <a href="cab.html">Cab Rides</a>
+                <a href="rentals.html">Vehicle Rentals</a>
+                <a href="rewards.html">EcoCoins</a>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h5>Company</h5>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Blog</a>
+            </div>
+            <div class="col-lg-4">
+                <h5>Contact</h5>
+                <p style="font-size:14px;"><i class="fa-solid fa-envelope" style="margin-right:8px; color: var(--primary);"></i> support@greencommute.in</p>
+                <p style="font-size:14px;"><i class="fa-solid fa-phone" style="margin-right:8px; color: var(--primary);"></i> +91 98765 43210</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GreenCommute. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
