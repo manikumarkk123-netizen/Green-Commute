@@ -6,6 +6,7 @@ import morgan from 'morgan';
 // Route Imports
 import cabRoutes from './routes/cabRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(morgan('dev'));
 // Mount Routes
 app.use('/api/cabs', cabRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {
