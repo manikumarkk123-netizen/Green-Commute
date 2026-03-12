@@ -2,16 +2,28 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 
 // In-memory store for OTPs (In production, use Redis or Database)
-// Structure: { 'email@example.com': { otp: '123456', expiresAt: 1700000000000 } }
 const otpStore = new Map();
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_EMAIL,
-        pass: process.env.GMAIL_APP_PASSWORD
+// Robust Nodemailer configuration
+const createTransporter = () => {
+    // Check if credentials exist
+    if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+        return null;
     }
-});
+
+    return nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // Use SSL
+        auth: {
+            user: process.env.GMAIL_EMAIL,
+            pass: process.env.GMAIL_APP_PASSWORD
+        },
+        // For debugging auth issues
+        debug: true,
+        logger: true 
+    });
+};
 
 // @desc    Send OTP to email
 // @route   POST /api/auth/send-otp
@@ -23,39 +35,45 @@ export const sendOtp = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Email is required' });
         }
 
-        // Generate 6-digit OTP
+        // Basic verification to block very obvious dummy domains (simple example)
+        const commonDummyDomains = ['test.com', 'example.com', 'tempmail.com', 'dummy.com'];
+        const domain = email.split('@')[1];
+        if (commonDummyDomains.includes(domain)) {
+            return res.status(400).json({ success: false, message: 'Domain not allowed. Please use a real email.' });
+        }
+
         const otp = crypto.randomInt(100000, 999999).toString();
-        
-        // Expiration: 10 minutes from now
         const expiresAt = Date.now() + 10 * 60 * 1000;
-        
         otpStore.set(email, { otp, expiresAt });
 
-        // If credentials are not set, just mock it (useful for local dev without email setup)
-        if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+        const transporter = createTransporter();
+
+        if (!transporter) {
             console.log(`\n\n=== MOCK OTP EMAIL ===\nTo: ${email}\nOTP: ${otp}\n======================\n\n`);
             return res.status(200).json({ 
                 success: true, 
-                message: 'OTP sent successfully (Mocked in console since GMAIL env vars are missing)' 
+                message: 'OTP logged to console (Backend .env missing GMAIL keys)' 
             });
         }
 
         const mailOptions = {
-            from: process.env.GMAIL_EMAIL,
+            from: `"Green Commute Auth" <${process.env.GMAIL_EMAIL}>`,
             to: email,
-            subject: 'Your Green Commute Security Code',
+            subject: `${otp} is your Green Commute code`,
             html: `
-                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-                    <div style="background-color: #0b0c10; padding: 20px; text-align: center;">
-                        <h1 style="color: #3b82f6; margin: 0; font-size: 24px;">Green Commute</h1>
-                    </div>
-                    <div style="padding: 30px; background-color: #ffffff;">
-                        <h2 style="color: #1e293b; margin-top: 0;">Verification Code</h2>
-                        <p style="color: #64748b; font-size: 16px; line-height: 1.5;">Please use the following 6-digit code to verify your email address. This code is valid for 10 minutes.</p>
-                        <div style="background-color: #f1f5f9; border-radius: 8px; padding: 15px; text-align: center; margin: 25px 0;">
-                            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #0f172a;">${otp}</span>
+                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; padding: 40px 20px;">
+                    <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <div style="background-color: #0f172a; padding: 30px; text-align: center;">
+                            <h1 style="color: #3b82f6; margin: 0; font-size: 24px; letter-spacing: 1px;">GREEN COMMUTE</h1>
                         </div>
-                        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 0;">If you didn't request this code, you can safely ignore this email.</p>
+                        <div style="padding: 40px; text-align: center;">
+                            <h2 style="color: #1e293b; font-size: 20px; margin-bottom: 10px;">Verify Your Identity</h2>
+                            <p style="color: #64748b; margin-bottom: 30px;">Use the code below to complete your action. It expires in 10 minutes.</p>
+                            <div style="background-color: #f1f5f9; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0f172a;">${otp}</span>
+                            </div>
+                            <p style="color: #94a3b8; font-size: 13px;">If you didn't request this code, please ignore this email.</p>
+                        </div>
                     </div>
                 </div>
             `
@@ -65,44 +83,82 @@ export const sendOtp = async (req, res) => {
         res.status(200).json({ success: true, message: 'OTP sent to email successfully' });
 
     } catch (error) {
-        console.error('Error sending OTP:', error);
-        res.status(500).json({ success: false, message: 'Failed to send OTP email' });
+        console.error('SMTP Error:', error);
+        // Fallback for development if SMTP fails but credentials might be wrong
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to send OTP email. Please ensure GMAIL_APP_PASSWORD is a valid 16-character App Password.' 
+        });
     }
 };
 
 // @desc    Verify OTP
 // @route   POST /api/auth/verify-otp
-// @access  Public
 export const verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
-        
         if (!email || !otp) {
             return res.status(400).json({ success: false, message: 'Email and OTP are required' });
         }
 
         const record = otpStore.get(email);
-
         if (!record) {
-            return res.status(400).json({ success: false, message: 'OTP expired or not found. Please request a new one.' });
+            return res.status(400).json({ success: false, message: 'OTP expired or not found.' });
         }
 
         if (Date.now() > record.expiresAt) {
             otpStore.delete(email);
-            return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
+            return res.status(400).json({ success: false, message: 'OTP has expired.' });
         }
 
         if (record.otp !== otp.toString()) {
-            return res.status(400).json({ success: false, message: 'Invalid OTP code' });
+            return res.status(400).json({ success: false, message: 'Invalid OTP code.' });
         }
 
-        // Verification successful, delete OTP to prevent reuse
         otpStore.delete(email);
-        
         res.status(200).json({ success: true, message: 'Email verified successfully' });
 
     } catch (error) {
-        console.error('Error verifying OTP:', error);
         res.status(500).json({ success: false, message: 'Failed to verify OTP' });
     }
 };
+
+// Helper: Send Welcome Email
+export const sendWelcomeEmail = async (req, res) => {
+    const { email, name } = req.body;
+    const transporter = createTransporter();
+    if (!transporter) return res.status(200).json({ success: true });
+
+    try {
+        await transporter.sendMail({
+            from: `"Green Commute" <${process.env.GMAIL_EMAIL}>`,
+            to: email,
+            subject: 'Welcome to Green Commute! 🌍',
+            html: `<h1>Hi ${name || 'User'},</h1><p>Thanks for joining the green revolution! Your account is now active.</p>`
+        });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Welcome Email Error:', error);
+        res.status(200).json({ success: true }); // Don't fail the whole request for a welcome email
+    }
+};
+
+// Helper: Send Login Alert
+export const sendLoginAlert = async (req, res) => {
+    const { email } = req.body;
+    const transporter = createTransporter();
+    if (!transporter) return res.status(200).json({ success: true });
+
+    try {
+        await transporter.sendMail({
+            from: `"Green Commute Security" <${process.env.GMAIL_EMAIL}>`,
+            to: email,
+            subject: 'New Login Detected 🛡️',
+            html: `<p>A new login was detected on your Green Commute account at ${new Date().toLocaleString()}.</p>`
+        });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(200).json({ success: true });
+    }
+};
+

@@ -49,6 +49,12 @@ export default function Login() {
       if (data.success) {
           // OTP verified, now authenticate with Firebase
           await login(email, password);
+          
+          // Trigger Login Alert
+          try {
+             await axios.post('http://localhost:5000/api/auth/login-alert', { email });
+          } catch (e) { console.error('Alert email fail', e); }
+
           setShowOtpModal(false);
           toast.success('Successfully logged in!');
           navigate('/dashboard');
@@ -56,6 +62,19 @@ export default function Login() {
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Invalid or expired OTP. Or incorrect password.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setOtpLoading(true);
+      await axios.post('http://localhost:5000/api/auth/send-otp', { email });
+      toast.success('Security code resent!');
+      setOtp('');
+    } catch (error) {
+      toast.error('Failed to resend code.');
     } finally {
       setOtpLoading(false);
     }
@@ -158,8 +177,13 @@ export default function Login() {
                value={otp}
                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                placeholder="000000"
-               className="w-full text-center text-3xl tracking-[0.5em] py-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold mb-8"
+               className="w-full text-center text-3xl tracking-[0.5em] py-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold mb-4"
             />
+
+            <p className="text-zinc-500 text-xs mb-8 text-center">
+               Didn't receive the code? 
+               <button onClick={handleResendOtp} disabled={otpLoading} className="text-blue-500 font-bold ml-1 hover:underline disabled:opacity-50">Resend Code</button>
+            </p>
             
             <div className="flex gap-3">
               <button 

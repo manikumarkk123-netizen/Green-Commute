@@ -51,6 +51,11 @@ export default function Register() {
           // OTP verified, now create user in Firebase Auth
           const userCredential = await signup(email, password);
           
+          // Trigger Welcome Email
+          try {
+             await axios.post('http://localhost:5000/api/auth/send-welcome', { email, name });
+          } catch (e) { console.error('Welcome email fail', e); }
+
           // Attempt to Create user profile in Node Backend API
           try {
             await axios.post('http://localhost:5000/api/users/register', {
@@ -69,6 +74,19 @@ export default function Register() {
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Invalid or expired OTP.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setOtpLoading(true);
+      await axios.post('http://localhost:5000/api/auth/send-otp', { email });
+      toast.success('A new code has been sent!');
+      setOtp('');
+    } catch (error) {
+      toast.error('Failed to resend code.');
     } finally {
       setOtpLoading(false);
     }
@@ -184,8 +202,13 @@ export default function Register() {
                value={otp}
                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} // Only allow numbers
                placeholder="000000"
-               className="w-full text-center text-3xl tracking-[0.5em] py-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold mb-8"
+               className="w-full text-center text-3xl tracking-[0.5em] py-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-white placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold mb-4"
             />
+
+            <p className="text-zinc-500 text-xs mb-8">
+               Didn't receive the code? 
+               <button onClick={handleResendOtp} disabled={otpLoading} className="text-blue-500 font-bold ml-1 hover:underline disabled:opacity-50">Resend Code</button>
+            </p>
             
             <div className="flex gap-3">
               <button 
