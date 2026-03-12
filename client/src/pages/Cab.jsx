@@ -11,6 +11,8 @@ export default function Cab() {
   const [dropoff, setDropoff] = useState('');
   const [selectedCab, setSelectedCab] = useState(null);
   const [distance, setDistance] = useState(0);
+  const [isBooking, setIsBooking] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const baseCabs = [
     { id: 'c1', name: 'Economy Electric', type: 'Tata Tigor EV', basePrice: 50, perKm: 12, arrival: '3 min', ecoCoins: 50, img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
@@ -34,6 +36,10 @@ export default function Cab() {
     setDistance(mockDistance);
     
     setStep(2);
+    setIsCalculating(true);
+    setTimeout(() => {
+      setIsCalculating(false);
+    }, 2500); // 2.5 seconds delay for simulation
   };
 
   const handleBook = () => {
@@ -108,8 +114,17 @@ export default function Cab() {
                      <p className="text-zinc-500 text-xs">Dropoff</p>
                      <p className="font-semibold text-white truncate max-w-[120px]">{dropoff}</p>
                    </div>
-                   <button onClick={() => setStep(1)} className="text-xs text-blue-500 font-bold hover:underline">Edit</button>
+                   <button onClick={() => {setStep(1); setIsCalculating(false);}} className="text-xs text-blue-500 font-bold hover:underline">Edit</button>
                 </div>
+
+                {isCalculating ? (
+                  <div className="flex flex-col items-center justify-center flex-grow py-12">
+                     <div className="w-16 h-16 border-4 border-zinc-800 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                     <h3 className="text-lg font-bold text-white mb-2">Calculating Shortest Route...</h3>
+                     <p className="text-sm text-zinc-500">Optimizing for time and eco-impact</p>
+                  </div>
+                ) : (
+                  <>
 
                 <div className="flex justify-between items-end mb-3">
                   <h3 className="font-bold text-zinc-300 block">Available Vehicles</h3>
@@ -147,6 +162,8 @@ export default function Cab() {
                 >
                   {isBooking ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : 'Confirm Booking'}
                 </button>
+                  </>
+                )}
               </motion.div>
             )}
 
@@ -196,7 +213,7 @@ export default function Cab() {
               className="absolute inset-0"
             ></iframe>
             {/* Map Overlay Graphic for aesthetics */}
-            {step === 2 && (
+            {step === 2 && isCalculating && (
                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-[#0b0c10]/20 backdrop-blur-[2px] flex items-center justify-center p-8 pointer-events-none">
                   <div className="bg-zinc-950/90 p-5 rounded-2xl shadow-2xl border border-zinc-800 text-center pointer-events-auto">
                     <FaMapMarkerAlt className="text-3xl text-blue-500 mx-auto mb-2 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
