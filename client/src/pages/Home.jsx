@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { FaLeaf, FaMapMarkerAlt, FaFlagCheckered, FaBolt, FaTaxi, FaBicycle, FaCoins } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaLeaf, FaMapMarkerAlt, FaFlagCheckered, FaBolt, FaTaxi, FaBicycle, FaCoins, FaArrowRight, FaCarSide, FaCheckCircle } from 'react-icons/fa';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Home() {
   const navigate = useNavigate();
