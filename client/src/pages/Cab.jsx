@@ -27,23 +27,46 @@ export default function Cab() {
     price: cab.basePrice + (cab.perKm * distance)
   }));
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (!pickup || !dropoff) {
       toast.error('Please enter both pickup and dropoff locations.');
       return;
     }
-    // Simulate realistic city route distance calculation based on input string length
-    // Use character codes to generate a pseudo-random but consistent number between 2 and 20 km
-    const hash = (pickup + dropoff).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const mockDistance = 2 + (hash % 18) + (hash % 10) / 10;
-    setDistance(mockDistance);
     
     setStep(2);
     setIsCalculating(true);
-    setTimeout(() => {
+    
+    try {
+      // 1. Geocode Pickup using OpenStreetMap Nominatim
+      const pickRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup)}`);
+      const pickData = await pickRes.json();
+      if (!pickData || pickData.length === 0) throw new Error('Pickup location not found');
+      
+      // 2. Geocode Dropoff
+      const dropRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dropoff)}`);
+      const dropData = await dropRes.json();
+      if (!dropData || dropData.length === 0) throw new Error('Dropoff location not found');
+
+      // 3. Get Shortest Route Distance from OSRM (Open Source Routing Machine)
+      const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${pickData[0].lon},${pickData[0].lat};${dropData[0].lon},${dropData[0].lat}?overview=false`);
+      const routeData = await routeRes.json();
+      
+      if (routeData.code === 'Ok' && routeData.routes.length > 0) {
+        const distanceInKm = routeData.routes[0].distance / 1000;
+        setDistance(Math.max(1, distanceInKm)); // Minimum 1km
+      } else {
+        throw new Error('Route calculation failed');
+      }
+    } catch (err) {
+      console.error('Route calculation error:', err);
+      toast.warn('Exact route failed. Using estimated distance.');
+      // Fallback pseudo-random estimator
+      const hash = (pickup + dropoff).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      setDistance(2 + (hash % 18) + (hash % 10) / 10);
+    } finally {
       setIsCalculating(false);
-    }, 2500); // 2.5 seconds delay for simulation
+    }
   };
 
   const handleBook = () => {
