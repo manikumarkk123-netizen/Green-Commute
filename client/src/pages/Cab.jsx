@@ -15,6 +15,8 @@ export default function Cab() {
   const [isCalculating, setIsCalculating] = useState(false);
 
   const baseCabs = [
+    { id: 'b1', name: 'Eco Bike', type: 'Ather 450X', basePrice: 20, perKm: 6, arrival: '2 min', ecoCoins: 15, img: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
+    { id: 'b2', name: 'Electric Scooter', type: 'Ola S1 Pro', basePrice: 25, perKm: 7, arrival: '3 min', ecoCoins: 20, img: 'https://images.unsplash.com/photo-1626082218525-245ed6945532?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
     { id: 'c1', name: 'Economy Electric', type: 'Tata Tigor EV', basePrice: 50, perKm: 12, arrival: '3 min', ecoCoins: 50, img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
     { id: 'c2', name: 'Premium Hybrid', type: 'Toyota Camry', basePrice: 100, perKm: 18, arrival: '5 min', ecoCoins: 30, img: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
     { id: 'c3', name: 'Ultra Green', type: 'Tesla Model 3', basePrice: 200, perKm: 25, arrival: '7 min', ecoCoins: 80, img: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80' },
@@ -176,7 +178,7 @@ export default function Cab() {
                     <FaCar className="text-5xl text-blue-500 animate-bounce" />
                  </div>
                  <h2 className="text-2xl font-bold text-white mb-2">Driver is on the way!</h2>
-                 <p className="text-zinc-400 mb-6">Captain Rahul (Electric Tata Tigor) is 3 minutes away.</p>
+                 <p className="text-zinc-400 mb-6">Captain Rahul ({cabs.find(c=>c.id === selectedCab)?.type || 'Electric Vehicle'}) is 3 minutes away.</p>
                  
                  <div className="w-full bg-zinc-950 p-4 rounded-2xl border border-zinc-800 flex justify-between items-center mb-6 shadow-md max-w-sm mx-auto">
                     <div className="text-left">
