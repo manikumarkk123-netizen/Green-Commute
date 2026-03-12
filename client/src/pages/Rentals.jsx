@@ -5,6 +5,9 @@ import { FaBicycle, FaMotorcycle, FaCarSide, FaBatteryFull, FaTag, FaCheckCircle
 
 export default function Rentals() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [rentDays, setRentDays] = useState(1);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const categories = ['All', 'E-Bikes', 'E-Scooters', 'E-Cars'];
   
@@ -19,8 +22,18 @@ export default function Rentals() {
 
   const filteredVehicles = activeCategory === 'All' ? vehicles : vehicles.filter(v => v.type === activeCategory);
 
-  const handleRent = (vehicleName) => {
-    toast.success(`Successfully booked ${vehicleName}! Check your email for pickup details.`);
+  const handleOpenModal = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setRentDays(1);
+  };
+
+  const handleRent = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      toast.success(`Successfully booked ${selectedVehicle.name} for ${rentDays} days! Check your email for pickup details.`);
+      setSelectedVehicle(null);
+    }, 1500);
   };
 
   return (
@@ -97,14 +110,13 @@ export default function Rentals() {
                 <span className="text-sm font-bold text-amber-400">+{vehicle.ecoCoins}</span>
               </div>
 
-              <button onClick={() => handleRent(vehicle.name)} className="w-full bg-transparent border-2 border-zinc-700 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-600 hover:border-blue-600 transition-all text-center">
+              <button onClick={() => handleOpenModal(vehicle)} className="w-full bg-transparent border-2 border-zinc-700 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-600 hover:border-blue-600 transition-all text-center">
                 Rent Now
               </button>
             </motion.div>
           ))}
         </div>
 
-        {/* Info Banner */}
         <div className="mt-16 max-w-4xl mx-auto bg-blue-600 rounded-3xl p-8 md:p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-2xl shadow-blue-900/40 relative overflow-hidden glass mix-blend-normal">
            <div className="absolute -right-10 -bottom-20 opacity-20 text-[250px] transform rotate-12"><FaCarSide /></div>
            <div className="relative z-10 md:w-2/3 mb-6 md:mb-0 text-center md:text-left">
@@ -115,6 +127,69 @@ export default function Rentals() {
              View Subscriptions
            </button>
         </div>
+
+        {/* Booking Modal Overlay */}
+        {selectedVehicle && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-[#09090b]/80 backdrop-blur-sm"
+              onClick={() => setSelectedVehicle(null)}
+            ></motion.div>
+            
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="relative bg-zinc-900 border border-white/10 p-8 rounded-3xl shadow-2xl shadow-black/50 max-w-md w-full z-10"
+            >
+              <div className="flex justify-between items-start mb-6">
+                 <div>
+                   <h2 className="text-2xl font-bold text-white leading-tight">{selectedVehicle.name}</h2>
+                   <p className="text-blue-500 font-medium text-sm">{selectedVehicle.type}</p>
+                 </div>
+                 <div className="text-4xl">{selectedVehicle.img}</div>
+              </div>
+              
+              <div className="bg-zinc-950/50 rounded-2xl p-4 border border-zinc-800 mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-zinc-400 text-sm">Hourly Rate</span>
+                  <span className="text-white font-bold">{selectedVehicle.rate}</span>
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-zinc-400 text-sm">Eco Range</span>
+                  <span className="text-zinc-300 font-medium">{selectedVehicle.range}</span>
+                </div>
+                
+                <div className="border-t border-zinc-800 pt-4">
+                  <label className="block text-zinc-400 text-xs font-bold mb-2 uppercase tracking-wide">Number of Days to Rent</label>
+                  <div className="flex items-center gap-4 bg-zinc-900 rounded-xl p-2 border border-zinc-700">
+                     <button onClick={() => setRentDays(Math.max(1, rentDays - 1))} className="w-10 h-10 rounded-lg bg-zinc-800 text-white font-bold hover:bg-zinc-700 flex items-center justify-center">-</button>
+                     <span className="flex-grow text-center text-xl font-bold text-white">{rentDays}</span>
+                     <button onClick={() => setRentDays(rentDays + 1)} className="w-10 h-10 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-500 flex items-center justify-center">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mb-8 px-2">
+                 <span className="text-zinc-400 font-bold">Estimated Total</span>
+                 <span className="text-3xl font-black text-white">₹{parseInt(selectedVehicle.rate.replace(/\D/g, '')) * 24 * rentDays}</span>
+              </div>
+              
+              <div className="flex gap-3">
+                <button onClick={() => setSelectedVehicle(null)} className="flex-1 py-4 rounded-xl font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors border border-transparent">Cancel</button>
+                <button 
+                  onClick={handleRent} 
+                  disabled={isProcessing}
+                  className="flex-[2] bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center"
+                >
+                  {isProcessing ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> : 'Confirm Booking'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
 
       </div>
     </div>
