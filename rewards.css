@@ -1,0 +1,91 @@
+/* ===== NAVBAR ===== */
+.custom-navbar {
+    background: #f8fbf9;
+    padding: 15px 0;
+}
+
+.logo-img {
+    width: 110px;   /* Small Logo */
+    height: auto;
+}
+
+.nav-link {
+    font-weight: 500;
+    margin-left: 15px;
+    color: #333 !important;
+}
+
+.nav-link.active {
+    color: #2e7d32 !important;
+    font-weight: 600;
+}
+
+/* ===== PAGE ===== */
+body {
+    background: linear-gradient(135deg, #eef5f1, #f9fcfa);
+    font-family: 'Poppins', sans-serif;
+}
+
+.rewards-section {
+    padding: 70px 20px;
+}
+
+/* ===== TITLES ===== */
+.page-title {
+    font-size: 38px;
+    font-weight: 700;
+    color: #2e7d32;
+}
+
+.page-subtitle {
+    color: #666;
+    margin-bottom: 40px;
+}
+
+/* ===== CARDS ===== */
+.reward-card {
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+}
+
+.reward-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+}
+
+/* Highlight Card */
+.highlight {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+}
+
+.points-value {
+    font-size: 55px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+/* Images */
+.reward-img {
+    width: 60px;
+    margin-bottom: 15px;
+}
+
+/* Button */
+.reward-btn {
+    background: #ffd400;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.reward-btn:hover {
+    background: #ffcc00;
+    transform: scale(1.05);
+}

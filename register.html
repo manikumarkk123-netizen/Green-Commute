@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register | Green Commute</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="login-register.css">
+</head>
+
+<script>
+function validate(){
+    var fn = frm.fname.value;
+    localStorage.setItem("firstname",fn);
+
+    var ln = frm.lname.value;
+    localStorage.setItem("lastname",ln);
+
+    var phn = frm.phone.value;
+    localStorage.setItem("phone",phn);
+
+    if(phn.length !== 10){
+        alert("Phone number must be 10 digits");
+        return false;
+    }
+
+    var pwd = frm.pwd.value;
+    localStorage.setItem("password",pwd);
+
+    if(pwd.length > 8 || pwd.length % 2 !== 0){
+        alert("Password must be even and max 8 characters");
+        return false;
+    }
+
+    var mail = frm.mailid.value;
+    localStorage.setItem("email",mail);
+
+    alert("Registration successful!");
+    return true;
+}
+</script>
+
+<body>
+
+<div class="auth-wrapper">
+    <h1>Register</h1>
+
+    <form name="frm" method="POST" action="login.html" onsubmit="return validate()">
+        <form class="register-form">
+
+    <div class="form-row">
+        <input type="text" placeholder="First Name" required>
+        <input type="text" placeholder="Last Name" required>
+    </div>
+    <br>
+    <div class="form-row">
+        <input type="text" placeholder="Phone Number" required>
+        <input type="email" placeholder="Email" required>
+    </div>
+<br>
+    <div class="form-row">
+        <input type="date" required>
+        <input type="text" placeholder="Username" required>
+    </div>
+<br>
+    <div class="form-row">
+        <input type="password" placeholder="Password" required>
+        <input type="text" placeholder="Age" required>
+    </div>
+<br>
+    <button type="submit" class="auth-btn">Register</button>
+
+</form>
+
+        
+    </form>
+</div>
+
+</body>
+</html>
