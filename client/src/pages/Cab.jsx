@@ -31,8 +31,10 @@ export default function Cab() {
       toast.error('Please enter both pickup and dropoff locations.');
       return;
     }
-    // Simulate distance calculation based on input string length
-    const mockDistance = Math.max(3, ((pickup.length + dropoff.length) * 1.2) % 35);
+    // Simulate realistic city route distance calculation based on input string length
+    // Use character codes to generate a pseudo-random but consistent number between 2 and 20 km
+    const hash = (pickup + dropoff).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const mockDistance = 2 + (hash % 18) + (hash % 10) / 10;
     setDistance(mockDistance);
     
     setStep(2);
