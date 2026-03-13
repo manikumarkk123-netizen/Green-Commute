@@ -5,7 +5,27 @@ import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaFlagCheckered, FaCar, FaBolt, FaLeaf, FaClock, FaBicycle, FaMotorcycle, FaBus, FaLightbulb, FaCoins } from 'react-icons/fa';
 import { FiCrosshair } from 'react-icons/fi';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import api from '../services/api';
+
+const userLocationIcon = L.divIcon({
+  className: 'user-location-marker',
+  html: `<div style="background-color: #3b82f6; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 13);
+    }
+  }, [center, map]);
+  return null;
+}
 
 export default function Cab() {
   const { currentUser, refreshUser } = useAuth();
@@ -21,6 +41,9 @@ export default function Cab() {
   const [recommendation, setRecommendation] = useState(null);
   const [showCoinPopup, setShowCoinPopup] = useState(false);
   const [earnedCoins, setEarnedCoins] = useState(0);
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  const tileLayerUrl = "http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}";
 
   const baseCabs = [
     { id: 'b1', name: 'Eco Bike', type: 'Bike', basePrice: 15, perKm: 5, arrival: '2 min', ecoCoins: 8, icon: <FaBicycle className="text-teal-400" /> },
@@ -51,6 +74,7 @@ export default function Cab() {
     toast.info('Fetching location...');
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
+      setCurrentLocation([latitude, longitude]);
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
         const data = await res.json();
@@ -296,19 +320,26 @@ export default function Cab() {
             )}
           </div>
 
-          {/* Map Area */}
           <div className="hidden lg:block bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden relative min-h-[500px] shadow-2xl">
-            <iframe
-              src={
-                (step >= 2 && pickup && dropoff)
-                  ? `https://maps.google.com/maps?saddr=${encodeURIComponent(pickup)}&daddr=${encodeURIComponent(dropoff)}&output=embed`
-                  : `https://maps.google.com/maps?q=${encodeURIComponent(pickup || 'Bengaluru, India')}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-              }
-              width="100%" height="100%"
-              style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) contrast(1.1) opacity(0.8)' }}
-              allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map View"
+            <MapContainer 
+              center={currentLocation || [12.9716, 77.5946]} // Default Bangalore
+              zoom={13} 
+              style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
               className="absolute inset-0"
-            ></iframe>
+            >
+              <TileLayer
+                attribution='&copy; Google Maps'
+                url={tileLayerUrl}
+              />
+              <MapUpdater center={currentLocation} />
+              {currentLocation && (
+                <Marker position={currentLocation} icon={userLocationIcon}>
+                  <Popup>You are here</Popup>
+                </Marker>
+              )}
+            </MapContainer>
+            
             {step === 2 && isCalculating && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-[#0b0c10]/20 backdrop-blur-[2px] flex items-center justify-center p-8 pointer-events-none">
                 <div className="bg-zinc-950/90 p-5 rounded-2xl shadow-2xl border border-zinc-800 text-center pointer-events-auto">

@@ -31,6 +31,13 @@ const fastEvIcon = createCustomIcon('#f59e0b', '⚡');
 const pickupIcon = createCustomIcon('#3b82f6', '📍');
 const dropoffIcon = createCustomIcon('#ef4444', '🏁');
 
+const userLocationIcon = L.divIcon({
+  className: 'user-location-marker',
+  html: `<div style="background-color: #3b82f6; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 0 4px rgba(59,130,246,0.3);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
 // Map View updater component
 function MapUpdater({ bounds }) {
   const map = useMap();
@@ -50,9 +57,10 @@ export default function RoutePlanner() {
   const [routeData, setRouteData] = useState(null);
   const [stations, setStations] = useState([]);
   const [filter, setFilter] = useState('All'); // All, Fast, Normal
+  const [currentLocation, setCurrentLocation] = useState(null);
 
-  // Earth view map tiles (ESRI World Imagery)
-  const tileLayerUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  // Google Maps Hybrid View
+  const tileLayerUrl = "http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}";
 
   const mapCenter = [20.5937, 78.9629]; // Default India
 
@@ -61,6 +69,7 @@ export default function RoutePlanner() {
       setLoading(true);
       navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude, longitude } = pos.coords;
+        setCurrentLocation([latitude, longitude]);
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
           const data = await res.json();
@@ -199,7 +208,7 @@ export default function RoutePlanner() {
         <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
           Smart Route Planner
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+        <p className="text-zinc-400 max-w-2xl mx-auto">
           Plan your commute with real-time EV charging stations along your route. Optimize your travel for maximum eco-efficiency.
         </p>
       </div>
@@ -209,12 +218,12 @@ export default function RoutePlanner() {
         {/* Sidebar Controls */}
         <div className="lg:col-span-1 space-y-6">
           <div className="card">
-            <h2 className="text-xl font-bold mb-6 text-zinc-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
               <FiNavigation className="text-emerald-500" /> Plan Journey
             </h2>
             <form onSubmit={handleRouteSearch} className="space-y-4">
               <div>
-                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-1">Pickup</label>
+                <label className="block text-sm text-zinc-400 mb-1">Pickup</label>
                 <div className="relative">
                   <FiMapPin className="absolute left-3 top-3 text-zinc-400" />
                   <input 
@@ -222,7 +231,7 @@ export default function RoutePlanner() {
                     value={pickup}
                     onChange={(e) => setPickup(e.target.value)}
                     placeholder="e.g. Gateway of India, Mumbai"
-                    className="w-full bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl py-2 pl-10 pr-12 text-zinc-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl py-2 pl-10 pr-12 text-white focus:outline-none focus:border-emerald-500"
                     required
                   />
                   <button 
@@ -236,7 +245,7 @@ export default function RoutePlanner() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-1">Destination</label>
+                <label className="block text-sm text-zinc-400 mb-1">Destination</label>
                 <div className="relative">
                   <FiMapPin className="absolute left-3 top-3 text-emerald-500" />
                   <input 
@@ -244,7 +253,7 @@ export default function RoutePlanner() {
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     placeholder="e.g. Pune Station"
-                    className="w-full bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/10 rounded-xl py-2 pl-10 pr-12 text-zinc-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-zinc-800/50 border border-white/10 rounded-xl py-2 pl-10 pr-12 text-white focus:outline-none focus:border-emerald-500"
                     required
                   />
                   <button 
@@ -269,36 +278,36 @@ export default function RoutePlanner() {
 
           {routeData && (
             <div className="card space-y-6">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <FiInfo className="text-emerald-500" /> Trip Overview
               </h2>
               
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400">Total Distance</p>
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-white">{routeData.distance} km</p>
+                <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                  <p className="text-sm text-emerald-400">Total Distance</p>
+                  <p className="text-2xl font-bold text-white">{routeData.distance} km</p>
                 </div>
-                <div className="bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400">Est. Time</p>
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-white">{routeData.time}</p>
+                <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                  <p className="text-sm text-emerald-400">Est. Time</p>
+                  <p className="text-2xl font-bold text-white">{routeData.time}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Eco Recommendation</p>
-                <p className="font-semibold text-zinc-900 dark:text-white">
+                <p className="text-sm text-zinc-400 mb-1">Eco Recommendation</p>
+                <p className="font-semibold text-white">
                   {parseFloat(routeData.distance) < 10 
                     ? "E-Bike or E-Scooter" 
                     : "Electric Car (e.g. Tata Nexon EV)"}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="pt-4 border-t border-zinc-800">
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+                  <h3 className="font-semibold text-white flex items-center gap-2">
                     <FiZap className="text-yellow-500" /> Nearby Chargers
                   </h3>
-                  <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs px-2 py-1 rounded-full font-bold">
+                  <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded-full font-bold">
                     {stations.length} Found
                   </span>
                 </div>
@@ -311,7 +320,7 @@ export default function RoutePlanner() {
                       className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
                         filter === f 
                         ? 'bg-emerald-500 text-white' 
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                       }`}
                     >
                       {f}
@@ -324,7 +333,7 @@ export default function RoutePlanner() {
         </div>
 
         {/* Map Container */}
-        <div className="lg:col-span-2 h-[600px] rounded-3xl overflow-hidden glass relative border border-zinc-200 dark:border-white/10 shadow-2xl">
+        <div className="lg:col-span-2 h-[600px] rounded-3xl overflow-hidden glass relative border border-white/10 shadow-2xl">
           <MapContainer 
             center={mapCenter} 
             zoom={5} 
@@ -332,9 +341,15 @@ export default function RoutePlanner() {
             zoomControl={false}
           >
             <TileLayer
-              attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
+              attribution='&copy; Google Maps'
               url={tileLayerUrl}
             />
+            
+            {currentLocation && (
+              <Marker position={currentLocation} icon={userLocationIcon}>
+                <Popup>Your Location</Popup>
+              </Marker>
+            )}
             
             {routeData && (
               <>
