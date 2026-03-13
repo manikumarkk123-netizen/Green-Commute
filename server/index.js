@@ -2,12 +2,19 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import connectDB from './config/db.js';
 
 // Route Imports
 import cabRoutes from './routes/cabRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import tripRoutes from './routes/tripRoutes.js';
+import leaderboardRoutes from './routes/leaderboardRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 
@@ -19,6 +26,9 @@ app.use(morgan('dev'));
 // Mount Routes
 app.use('/api/cabs', cabRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/trips', tripRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {
